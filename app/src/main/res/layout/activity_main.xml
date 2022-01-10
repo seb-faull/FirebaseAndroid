@@ -71,7 +71,7 @@
         />
 
     <!-- ....... Login ...... -->
-    <EditText
+    <Button
         android:id="@+id/signIn"
         android:layout_width="380dp"
         android:layout_height="70dp"
