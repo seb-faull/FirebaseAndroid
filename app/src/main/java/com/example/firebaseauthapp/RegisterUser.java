@@ -1,5 +1,6 @@
 package com.example.firebaseauthapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -10,8 +11,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Objects;
 
 public class RegisterUser extends AppCompatActivity implements View.OnClickListener {
 
@@ -60,34 +68,80 @@ public class RegisterUser extends AppCompatActivity implements View.OnClickListe
         String fullName = editTextFullName.getText().toString().trim();
         String age = editTextAge.getText().toString().trim();
 
+        boolean isValidationSuccessful = true;
+
         if (fullName.isEmpty()) {
+            isValidationSuccessful = false;
             editTextFullName.setError("Please enter your full name.");
             editTextFullName.requestFocus();
         }
 
         if (age.isEmpty()) {
+            isValidationSuccessful = false;
             editTextAge.setError("Please enter your age.");
             editTextAge.requestFocus();
         }
 
         if (email.isEmpty()) {
+            isValidationSuccessful = false;
             editTextEmail.setError("Please enter your email address.");
             editTextEmail.requestFocus();
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            isValidationSuccessful = false;
             editTextEmail.setError("Please provide a valid email address.");
             editTextEmail.requestFocus();
         }
 
         if (password.isEmpty()) {
+            isValidationSuccessful = false;
             editTextPassword.setError("Please enter your password.");
             editTextPassword.requestFocus();
         }
 
         if (password.length() < 6) {
+            isValidationSuccessful = false;
             editTextPassword.setError("Minimum password length should be 6 characters.");
             editTextPassword.requestFocus();
         }
+
+        if (isValidationSuccessful) {
+            showProgressBar();
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            User user = new User(fullName, age, email);
+
+                            FirebaseDatabase.getInstance().getReference("Users")
+                                    .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                                    .setValue(user).addOnCompleteListener(task2 -> {
+                                        if (task2.isSuccessful()) {
+                                            Toast.makeText(RegisterUser.this, "Welcome onboard!", Toast.LENGTH_LONG).show();
+                                            showProgressBar();
+
+                                            // Re-direct to login layout!
+                                        } else {
+                                            toastFailedToRegisterUser();
+                                        }
+                                    });
+                        } else {
+                            toastFailedToRegisterUser();
+                        }
+                    });
+        }
+    }
+
+    private void showProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar() {
+        progressBar.setVisibility(View.GONE);
+    }
+
+    private void toastFailedToRegisterUser() {
+        Toast.makeText(RegisterUser.this, "Failed to register. Try again!", Toast.LENGTH_LONG).show();
+        hideProgressBar();
     }
 }
