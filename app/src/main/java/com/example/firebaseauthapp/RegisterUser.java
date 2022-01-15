@@ -109,16 +109,16 @@ public class RegisterUser extends AppCompatActivity implements View.OnClickListe
         if (isValidationSuccessful) {
             showProgressBar();
             mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(task1 -> {
-                        if (task1.isSuccessful()) {
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
                             User user = new User(fullName, age, email);
 
-                            FirebaseDatabase.getInstance().getReference("Users")
-                                    .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                            FirebaseDatabase.getInstance("https://gfauth-78cd6-default-rtdb.europe-west1.firebasedatabase.app").getReference("Users")
+                                    .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                     .setValue(user).addOnCompleteListener(task2 -> {
                                         if (task2.isSuccessful()) {
                                             Toast.makeText(RegisterUser.this, "Welcome onboard!", Toast.LENGTH_LONG).show();
-                                            showProgressBar();
+                                            hideProgressBar();
 
                                             // Re-direct to login layout!
                                         } else {
