@@ -128,6 +128,8 @@ public class RegisterUser extends AppCompatActivity implements View.OnClickListe
                         } else {
                             toastFailedToRegisterUser();
                         }
+
+                        hideProgressBar();
                     });
         }
     }
@@ -142,6 +144,5 @@ public class RegisterUser extends AppCompatActivity implements View.OnClickListe
 
     private void toastFailedToRegisterUser() {
         Toast.makeText(RegisterUser.this, "Failed to register. Try again!", Toast.LENGTH_LONG).show();
-        hideProgressBar();
     }
 }

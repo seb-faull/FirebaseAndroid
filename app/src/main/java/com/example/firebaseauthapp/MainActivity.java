@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -89,11 +90,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            // redirect to user profile
-                            startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                            if (user.isEmailVerified()) {
+                                // redirect to user profile
+                                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                            } else {
+                                user.sendEmailVerification();
+                                Toast.makeText(MainActivity.this, "Check your email to verify your account.", Toast.LENGTH_LONG).show();
+                            }
                         } else {
                             Toast.makeText(MainActivity.this, "Failed to login. Please check your credentials.", Toast.LENGTH_LONG).show();
                         }
+
+                        hideProgressBar();
                     });
         }
     }
